@@ -1,0 +1,13 @@
+fsspec
+s3fs
+sagemaker
+pyjanitor==0.20.10
+tensorflow==2.3.0
+fastapi==0.63.0
+scikit-learn==0.22.1
+scipy==1.4.1
+numpy==1.18.5
+boto3==1.16.37
+pandas==1.0.1
+uvicorn==0.11.8
+starlette==0.13.6
