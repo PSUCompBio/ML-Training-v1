@@ -12,6 +12,7 @@ FEATURE_PATH = os.path.join(PATH_PKG, "resources/features.json")
 DATA_PATH = os.path.join(PATH_PKG, "data")
 MODEL_PATH = os.path.join(PATH_PKG, "model")
 RESULT_PATH = os.path.join(PATH_PKG, "result")
+TRAIN_FILE_PATH = os.path.join(PATH_PKG,"train.py")
 
 
 

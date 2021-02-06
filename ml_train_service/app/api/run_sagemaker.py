@@ -13,13 +13,13 @@ import json
 def train_in_sagemaker():
 
     estimator = TensorFlow(
-        entry_point="train.py",
+        entry_point=TRAIN_FILE_PATH,
         role=sagemaker_role,
         instance_count=1,
         instance_type='ml.m5.large',
         framework_version="2.2",
         py_version="py37",
-        hyperparameters={"bucket_name":bucket_name},
+        hyperparameters={"bucket_name": bucket_name},
     )
 
     try:
@@ -27,6 +27,7 @@ def train_in_sagemaker():
         estimator.fit(data_path)
         return True
     except:
+        raise
         return False
 
 
@@ -116,5 +117,5 @@ def create_and_evaluate_model():
             return {"message": "Failed to evaluate model", "success": False}
 
     else:
-        return {"message":"Failed to train a model","success":False}
+        return {"message":"Failed to train the model","success":False}
 
