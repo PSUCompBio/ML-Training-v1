@@ -94,7 +94,7 @@ def evaluate():
 
     s3_client.upload_file(Filename=os.path.join(RESULT_PATH,"test_result.json"),
                        Bucket=bucket_name,
-                       Key="models/base_ml/test_result.json")
+                       Key="models/base_model/test_result.json")
 
 
 def create_and_evaluate_model():
@@ -102,7 +102,6 @@ def create_and_evaluate_model():
         print("Preprocessing and uploading training data")
         upload()
     except:
-        raise
         return {"message":"Failed to create data","success":False}
 
     print("Training model")

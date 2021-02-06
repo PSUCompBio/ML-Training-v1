@@ -1,5 +1,10 @@
 import boto3
 import os
+# from dotenv import load_dotenv
+# # OR, explicitly providing path to '.env'
+# from pathlib import Path  # Python 3.6+ only
+# env_path = Path('.') / '.env'
+# load_dotenv(dotenv_path=env_path)
 
 PATH_PKG = os.path.dirname(os.path.abspath(__file__))
 # PATH_PKG = "."
@@ -27,10 +32,10 @@ if not os.path.exists(RESULT_PATH):
 session = boto3.Session(
     aws_access_key_id=os.environ["aws_access_key_id"],
     aws_secret_access_key=os.environ["aws_secret_access_key"],
-    region_name=os.environ["region_name"])
+    region_name=os.environ["region"])
 
 s3_resource = session.resource('s3')
 s3_client = session.client('s3')
 
-bucket_name = os.environ["bucket"]
+bucket_name = os.environ["bucket_name"]
 sagemaker_role = os.environ['sagemaker_role']

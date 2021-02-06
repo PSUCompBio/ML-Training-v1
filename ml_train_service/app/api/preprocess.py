@@ -9,6 +9,9 @@ from dateutil.parser import parse
 from .config import *
 import json
 
+
+
+
 #initialize input feature table
 with open(FEATURE_PATH) as f:
     features = json.load(f)
@@ -741,8 +744,8 @@ def create_target_table(bucket, filestring):
     # sonfile='s3://' + bucket + '/'+ filestring
     csvfile = 's3://' + bucket + '/' + filestring
     # print('csvfile:',csvfile)
-    # f = client.get_object(Bucket=bucket, Key=filestring)
-    TargetMPS = pd.read_csv(csvfile, header=None)
+    file = s3_client.get_object(Bucket=bucket, Key=filestring)
+    TargetMPS = pd.read_csv(file['Body'], header=None)
     TargetMPS.columns = ['elementID', 'MPS']
     # print(TargetMPS)
 
@@ -806,11 +809,9 @@ def read_data():
         try:
             if success:
                 TargetMPS.append(create_target_table(bucket_name, mps_file))
-        except:
-            raise
+        except Exception as E:
             InpFeat.drop(InpFeat.tail(1).index, inplace=True)
             print(f"Error in mps file for {mps_file}")
-
     # Dropping data if all zero
     df = InpFeat.copy()
     df2 = df[df.eq(0).all(1)]
@@ -822,6 +823,8 @@ def read_data():
 
     return df, MPS_new
 
+
+# read_data()
 
 
 

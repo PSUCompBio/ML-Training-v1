@@ -6,6 +6,6 @@ from fastapi import BackgroundTasks
 train = APIRouter()
 
 @train.post('/base-model',status_code=201)
-async def predict_mps(background_tasks: BackgroundTasks):
-    background_tasks.add_task(create_and_evaluate_model)
-    return {"message":"Training Process started"}
+async def predict_mps():
+    result = create_and_evaluate_model()
+    return result

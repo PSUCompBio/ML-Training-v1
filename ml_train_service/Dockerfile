@@ -8,8 +8,9 @@ RUN apt-get update \
     && apt-get install gcc -y \
     && apt-get clean
 
+RUN pip install --upgrade pip
 RUN pip install -r /app/requirements.txt
 
 COPY . /app/
 
-CMD uvicorn app.main:app  --host 0.0.0.0 --port 8000
+CMD uvicorn app.main:app  --host 0.0.0.0 --port 8000 --timeout-keep-alive 600
