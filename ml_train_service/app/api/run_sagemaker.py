@@ -98,14 +98,13 @@ def evaluate():
                        Key="models/base_model/test_result.json")
 
 
-def create_and_evaluate_model():
+async def create_and_evaluate_model():
     SAVE_DB = True
     message = {"date_time": dt.now(), "model_name": "base_model",
                "message": "Preprocessing and uploading training data",
                "training_status": "Processing"}
-    if SAVE_DB:
-        result = insert_log(message)
-        db_obj = get_log("base_model")
+    result = await insert_log(message)
+    db_obj = await get_log("base_model")
     try:
         print("Preprocessing and uploading training data")
         upload()
@@ -117,7 +116,7 @@ def create_and_evaluate_model():
                        "message": "Failed to create data",
                        "training_status": "Failed"}
 
-            update_log(db_obj["id"],message)
+            await update_log(db_obj["id"],message)
 
         return {"message":"Failed to create data","success":False}
 
@@ -126,7 +125,7 @@ def create_and_evaluate_model():
         message = {"date_time": dt.now(), "model_name": "base_model",
                    "message": "Training model",
                    "training_status": "Processing"}
-        update_log(db_obj["id"], message)
+        await update_log(db_obj["id"], message)
 
 
     print("Training model")
@@ -138,7 +137,7 @@ def create_and_evaluate_model():
                 message = {"date_time": dt.now(), "model_name": "base_model",
                            "message": "Evaluating model",
                            "training_status": "Processing"}
-                update_log(db_obj["id"], message)
+                await update_log(db_obj["id"], message)
 
             print("Evaluating model")
 
@@ -148,7 +147,7 @@ def create_and_evaluate_model():
                 message = {"date_time": dt.now(), "model_name": "base_model",
                            "message": "Training and evaluation completed successfully",
                            "training_status": "Success"}
-                update_log(db_obj["id"], message)
+                await update_log(db_obj["id"], message)
 
             return {"message":f"Results available at {os.path.join(bucket_name,'models/base_ml')}"}
         except:
@@ -156,7 +155,7 @@ def create_and_evaluate_model():
                 message = {"date_time": dt.now(), "model_name": "base_model",
                            "message": "Failed to evaluate the model",
                            "training_status": "Failed"}
-                update_log(db_obj["id"], message)
+                await update_log(db_obj["id"], message)
             return {"message": "Failed to evaluate model", "success": False}
 
     else:
@@ -164,6 +163,6 @@ def create_and_evaluate_model():
             message = {"date_time": dt.now(), "model_name": "base_model",
                        "message": "Failed to train the model",
                        "training_status": "Failed"}
-            update_log(db_obj["id"], message)
+            await update_log(db_obj["id"], message)
         return {"message":"Failed to train the model","success":False}
 

@@ -13,8 +13,11 @@ async def train_mps():
 
 @train.get('/recent-logs', response_model=LogOut)
 async def get_trainig_logs(model_name: str):
-    result = await get_log(model_name)
-    if result:
-        return result
-    else:
-        return {"message":"No data found"}
+    try:
+        result = await get_log(model_name)
+        if result:
+            return result
+        else:
+            return {"message":"No data found"}
+    except:
+        return {"message": "Can't get result"}
