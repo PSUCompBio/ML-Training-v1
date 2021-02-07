@@ -5,10 +5,36 @@ services:
     build: ./ml_train_service
     volumes:
       - ./ml_train_service/:/app/
+    environment:
+      - DATABASE_URI=postgresql://mps_ml:ml_mps_95@mps_training_db/mps_training_db
+
     env_file:
       - .env
     ports:
       - 8001:8000
+
+  mps_training_db:
+    image: postgres:12.1-alpine
+    volumes:
+      - postgres_data_mps_training:/var/lib/postgresql/data/
+    environment:
+      - POSTGRES_USER=mps_ml
+      - POSTGRES_PASSWORD=ml_mps_95
+      - POSTGRES_DB=mps_training_db
+
+  mps_pgadmin:
+    container_name: mps_pgadmin
+    image: dpage/pgadmin4
+    environment:
+      - PGADMIN_DEFAULT_EMAIL=pgadmin4@pgadmin.org
+      - PGADMIN_DEFAULT_PASSWORD=admin
+    ports:
+      - "5050:80"
+    depends_on:
+      - mps_training_db
+    volumes:
+      - pgadmin:/root/.pgadmin
+
 
   nginx:
     image: nginx:latest
@@ -18,5 +44,9 @@ services:
       - ./nginx_config.conf:/etc/nginx/conf.d/default.conf
     depends_on:
       - ml_train_service
+
+volumes:
+  postgres_data_mps_training:
+  pgadmin:
 
 

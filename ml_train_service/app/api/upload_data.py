@@ -20,7 +20,6 @@ def upload_pickle():
         for file in files:
             s3_client.upload_file(os.path.join(root, file), bucket_name, os.path.join(sub_folder, file))
 
-
 def upload():
     try:
         features,targets = read_data()

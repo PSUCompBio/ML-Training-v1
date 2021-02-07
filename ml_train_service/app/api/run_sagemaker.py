@@ -8,7 +8,8 @@ from joblib import load
 from sklearn.metrics import r2_score, mean_absolute_error, mean_squared_error
 import math
 import json
-
+from datetime import datetime as dt
+from .db_manager import *
 
 def train_in_sagemaker():
 
@@ -27,7 +28,6 @@ def train_in_sagemaker():
         estimator.fit(data_path)
         return True
     except:
-        raise
         return False
 
 
@@ -99,23 +99,71 @@ def evaluate():
 
 
 def create_and_evaluate_model():
+    SAVE_DB = True
+    message = {"date_time": dt.now(), "model_name": "base_model",
+               "message": "Preprocessing and uploading training data",
+               "training_status": "Processing"}
+    if SAVE_DB:
+        result = insert_log(message)
+        db_obj = get_log("base_model")
     try:
         print("Preprocessing and uploading training data")
         upload()
+
+
     except:
+        if SAVE_DB:
+            message = {"date_time": dt.now(), "model_name": "base_model",
+                       "message": "Failed to create data",
+                       "training_status": "Failed"}
+
+            update_log(db_obj["id"],message)
+
         return {"message":"Failed to create data","success":False}
+
+
+    if SAVE_DB:
+        message = {"date_time": dt.now(), "model_name": "base_model",
+                   "message": "Training model",
+                   "training_status": "Processing"}
+        update_log(db_obj["id"], message)
+
 
     print("Training model")
     success = train_in_sagemaker()
 
     if success:
         try:
+            if SAVE_DB:
+                message = {"date_time": dt.now(), "model_name": "base_model",
+                           "message": "Evaluating model",
+                           "training_status": "Processing"}
+                update_log(db_obj["id"], message)
+
             print("Evaluating model")
+
             evaluate()
+
+            if SAVE_DB:
+                message = {"date_time": dt.now(), "model_name": "base_model",
+                           "message": "Training and evaluation completed successfully",
+                           "training_status": "Success"}
+                update_log(db_obj["id"], message)
+
             return {"message":f"Results available at {os.path.join(bucket_name,'models/base_ml')}"}
         except:
+            if SAVE_DB:
+                message = {"date_time": dt.now(), "model_name": "base_model",
+                           "message": "Failed to evaluate the model",
+                           "training_status": "Failed"}
+                update_log(db_obj["id"], message)
             return {"message": "Failed to evaluate model", "success": False}
 
     else:
+        if SAVE_DB:
+            message = {"date_time": dt.now(), "model_name": "base_model",
+                       "message": "Failed to train the model",
+                       "training_status": "Failed"}
+            update_log(db_obj["id"], message)
         return {"message":"Failed to train the model","success":False}
 
