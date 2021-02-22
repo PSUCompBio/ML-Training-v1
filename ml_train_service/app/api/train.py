@@ -1,5 +1,9 @@
 import tensorflow as tf
 from tensorflow.keras.callbacks import ModelCheckpoint, CSVLogger
+from tensorflow.keras import backend as K
+from tensorflow.keras.wrappers.scikit_learn import KerasRegressor
+import eli5
+from eli5.sklearn import PermutationImportance
 from tensorflow.keras import layers
 import argparse
 import os
@@ -8,7 +12,7 @@ import boto3
 import json
 
 
-def model(X_train, y_train, X_val, y_val,callbacks):
+def model():
     model = tf.keras.Sequential([
         layers.Dense(300, input_dim=240, activation='relu', kernel_regularizer='l2'),
         layers.Dropout(.5),
@@ -21,10 +25,18 @@ def model(X_train, y_train, X_val, y_val,callbacks):
                   loss=tf.keras.losses.MeanSquaredError(),
                   metrics=['mae'])
 
-    model.fit(X_train, y_train, batch_size=128, epochs=200,
-              validation_data=(X_val, y_val),callbacks=callbacks)
-
     return model
+
+def permutation_importance(X,y,estimator,features,base_path):
+    perm = PermutationImportance(estimator, random_state=1).fit(X, y)
+    eli5.show_weights(perm, feature_names=features)
+
+    zip_iterator = zip(features, perm.feature_importances_.tolist())
+
+    weight_dict = dict(zip_iterator)
+
+    with open(os.path.join(base_path,'feature_importance.json'), 'w') as fp:
+        json.dump(weight_dict, fp)
 
 
 def _load_training_data(base_dir):
@@ -68,6 +80,7 @@ if __name__ == "__main__":
 
     # base_path = os.path.join(args.sm_model_dir, 'base_model')
     base_path = args.sm_model_dir
+    features = args.feature_names
 
     best_model = ModelCheckpoint(os.path.join(base_path,"best.h5"), monitor='val_loss', verbose=1, save_best_only=True)
 
@@ -75,9 +88,18 @@ if __name__ == "__main__":
 
     callbacks = [best_model,csv_logger]
 
-    mdl = model(train_data, train_labels, eval_data, eval_labels,callbacks)
+
+    seed = 7
+    np.random.seed(seed)
+    estimator = KerasRegressor(build_fn=model, validation_split=0.2, verbose=1, epochs=10, batch_size=32,
+                               callbacks=callbacks)
+    estimator.fit(train_data, train_labels)
     # loaded_model = mdl.load_weights(os.path.join(args.sm_model_dir,"best.h5"))
-    mdl.save(os.path.join(base_path,"model.h5"))
+    estimator.model.save(os.path.join(base_path,"model.h5"))
+
+    #save feature importance
+    permutation_importance(train_data,train_labels,estimator,features,base_path)
+
 
     client.upload_file(Filename=os.path.join(base_path,"model.h5"),
                        Bucket=bucket,
@@ -86,4 +108,8 @@ if __name__ == "__main__":
     client.upload_file(Filename=os.path.join(base_path, "history.csv"),
                        Bucket=bucket,
                        Key='models/base_model/history.csv')
+
+    client.upload_file(Filename=os.path.join(base_path, "feature_importance.json"),
+                       Bucket=bucket,
+                       Key='models/base_model/feature_importance.json')
 

@@ -11,6 +11,10 @@ import json
 from datetime import datetime as dt
 from .db_manager import *
 
+#initialize input feature table
+with open(FEATURE_PATH) as f:
+    features = json.load(f)
+
 def train_in_sagemaker():
 
     estimator = TensorFlow(
@@ -20,7 +24,7 @@ def train_in_sagemaker():
         instance_type='ml.m5.large',
         framework_version="2.2",
         py_version="py37",
-        hyperparameters={"bucket_name": bucket_name},
+        hyperparameters={"bucket_name": bucket_name,"feature_names":features["feature_names"]},
     )
 
     try:

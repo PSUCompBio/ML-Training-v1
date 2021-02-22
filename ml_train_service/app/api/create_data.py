@@ -36,32 +36,32 @@ def data_augment(df, std_range, InpFeat, mean=0):
 
 
 def get_train_test_data(df,MPS_new):
-    X_train, X_test, y_train, y_test = train_test_split(df, MPS_new, test_size=0.30, random_state=42)
+    X_train, X_test, y_train, y_test = train_test_split(df, MPS_new, test_size=0.15, random_state=42)
 
     # Standardization
     scaler = StandardScaler()
     scaler.fit(X_train)
 
-    X_valid, X_test, y_valid, y_test = train_test_split(X_test, y_test, test_size=0.5, random_state=42)
+    # X_valid, X_test, y_valid, y_test = train_test_split(X_test, y_test, test_size=0.5, random_state=42)
 
     X_train_final = data_augment(X_train, [0.01, 0.02], df, 0)
     y_train_final = np.concatenate((y_train, y_train, y_train), axis=0)
 
     # Standardizing training and validation set
     X_train_trans = scaler.transform(X_train_final)
-    X_valid_trans = scaler.transform(X_valid)
+    # X_valid_trans = scaler.transform(X_valid)
     X_test_trans = scaler.transform(X_test)
 
     # Natural Logarithm
     y_log = np.log1p(y_train)
     y_train_log = np.log1p(y_train_final)
-    y_valid_log = np.log1p(y_valid)
+    # y_valid_log = np.log1p(y_valid)
 
     scaler_mps = StandardScaler()
     scaler_mps.fit(y_log)
 
     y_train_trans = scaler_mps.transform(y_train_log)
-    y_valid_trans = scaler_mps.transform(y_valid_log)
+    # y_valid_trans = scaler_mps.transform(y_valid_log)
 
     # Save standerdization model
     dump(scaler, os.path.join(MODEL_PATH, "scaler_X.joblib"))
@@ -69,12 +69,15 @@ def get_train_test_data(df,MPS_new):
 
     np.save(os.path.join(DATA_PATH, 'training_label.npy'), y_train_trans)
     np.save(os.path.join(DATA_PATH, 'training.npy'), X_train_trans)
-    np.save(os.path.join(DATA_PATH, 'validation.npy'), X_valid_trans)
-    np.save(os.path.join(DATA_PATH, 'validation_label.npy'), y_valid_trans)
+    # np.save(os.path.join(DATA_PATH, 'validation.npy'), X_valid_trans)
+    # np.save(os.path.join(DATA_PATH, 'validation_label.npy'), y_valid_trans)
 
     np.save(os.path.join(DATA_PATH, 'test.npy'), X_test_trans)
     np.save(os.path.join(DATA_PATH, 'test_label.npy'), y_test)
 
-    return X_train_trans,y_train_trans,X_valid_trans,y_valid_trans,X_test_trans,y_test
+    # return X_train_trans,y_train_trans,X_valid_trans,y_valid_trans,X_test_trans,y_test
+
+    return X_train_trans,y_train_trans,X_test_trans,y_test
+
 
 
