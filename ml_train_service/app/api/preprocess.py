@@ -804,14 +804,18 @@ def read_data():
             ImpactID = ImpactID + 1
             success = True
         except Exception as e:
-            print(f"Error in input feature for {input_json_path}")
+            print(f"Error in input feature for {input_json_path} is {e}")
 
         try:
             if success:
                 TargetMPS.append(create_target_table(bucket_name, mps_file))
         except Exception as E:
             InpFeat.drop(InpFeat.tail(1).index, inplace=True)
-            print(f"Error in mps file for {mps_file}")
+            print(f"Error in mps file for {mps_file} is {E}")
+
+    # Reseting index after deleting row having corrupt mps file
+    InpFeat = InpFeat.reset_index(drop=True)
+
     # Dropping data if all zero
     df = InpFeat.copy()
     df2 = df[df.eq(0).all(1)]
@@ -820,6 +824,8 @@ def read_data():
     # Process Labels
     MPS = np.array([TargetMPS[i].sort_values("elementID").MPS.to_list() for i in range(len(TargetMPS))])
     MPS_new = np.delete(MPS, df2.index.tolist(), axis=0)
+
+    print(len(df))
 
     return df, MPS_new
 

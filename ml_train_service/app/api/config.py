@@ -1,7 +1,7 @@
 import boto3
 import os
 # from dotenv import load_dotenv
-# # OR, explicitly providing path to '.env'
+# # # OR, explicitly providing path to '.env'
 # from pathlib import Path  # Python 3.6+ only
 # env_path = Path('.') / '.env'
 # load_dotenv(dotenv_path=env_path)
@@ -13,7 +13,7 @@ DATA_PATH = os.path.join(PATH_PKG, "data")
 MODEL_PATH = os.path.join(PATH_PKG, "model")
 RESULT_PATH = os.path.join(PATH_PKG, "result")
 TRAIN_FILE_PATH = os.path.join(PATH_PKG,"train.py")
-
+TRAIN_REQUIREMENTS = os.path.join(PATH_PKG,"requirements.txt")
 
 
 if not os.path.exists(DATA_PATH):
