@@ -34,12 +34,13 @@ def model():
 def permutation_importance(X,y,estimator,features,base_path):
     perm = PermutationImportance(estimator, random_state=1).fit(X, y)
 
-    zip_iterator = zip(features, perm.feature_importances_.tolist())
+    zip_iterator = zip(features["feature_names"], perm.feature_importances_.tolist())
 
     weight_dict = dict(zip_iterator)
+    sorted_weight = dict(sorted(weight_dict.items(), key=lambda item: item[1], reverse=True)[:5])
 
     with open(os.path.join(base_path,'feature_importance.json'), 'w') as fp:
-        json.dump(weight_dict, fp)
+        json.dump(sorted_weight, fp)
 
 
 def _load_training_data(base_dir):
@@ -70,7 +71,6 @@ def _parse_args():
 
 
 if __name__ == "__main__":
-
     args, unknown = _parse_args()
 
     train_data, train_labels = _load_training_data(args.train)

@@ -16,16 +16,13 @@ with open(FEATURE_PATH) as f:
     features = json.load(f)
 
 def train_in_sagemaker():
-    # env = {
-    #     'SAGEMAKER_REQUIREMENTS': TRAIN_REQUIREMENTS,  # path relative to `source_dir` below.
-    # }
 
     estimator = TensorFlow(
         entry_point="train.py",
         role=sagemaker_role,
         instance_count=1,
         instance_type='ml.m5.large',
-        source_dir='./',
+        source_dir=PATH_PKG,
         requirements_file='requirements.txt',
         framework_version="2.2",
         py_version="py37",
@@ -37,6 +34,7 @@ def train_in_sagemaker():
         estimator.fit(data_path)
         return True
     except:
+        raise
         return False
 
 
@@ -108,7 +106,7 @@ def evaluate():
 
 
 async def create_and_evaluate_model():
-    SAVE_DB = False
+    SAVE_DB = True
     message = {"date_time": dt.now(), "model_name": "base_model",
                "message": "Preprocessing and uploading training data",
                "training_status": "Processing"}
@@ -175,4 +173,3 @@ async def create_and_evaluate_model():
             await update_log(db_obj["id"], message)
         return {"message":"Failed to train the model","success":False}
 
-train_in_sagemaker()
